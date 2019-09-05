@@ -1,0 +1,29 @@
+version: "3"
+services:
+    rabbitmq:
+        hostname: rabbitmq-server
+        image: rabbitmq:latest
+        environment:
+            - RABBITMQ_DEFAULT_USER=guest
+            - RABBITMQ_DEFAULT_PASS=guest
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+
+    redis:
+        hostname: redis-server
+        image: redis:latest
+        ports:
+            - "6379:6379"
+
+    celery_worker:
+        build: .
+        command: celery -A stalks.tasks worker -B -l DEBUG -c 2
+        volumes:
+            - .:/app
+        links:
+            - rabbitmq
+            - redis
+        depends_on:
+            - rabbitmq
+            - redis
